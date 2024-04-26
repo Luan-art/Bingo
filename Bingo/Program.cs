@@ -32,12 +32,12 @@ Recursos opcionais: (Ultimo)
 Cada jogador pode ter mais de uma cartela.
 O jogo deve ser capaz de ser jogado por mais de 2 jogadores, onde o usuário informa no inicio do programa a quantidade de jogadores que ele deseja.*/
 
-int linhaColuna = 5, maxSorteados = 25, escopoNumero = 25, marcadosCartela = 0, variavelParaContinuarJogando = 0, numeroRodada, nJogadores = NumeroJogadores();
+int linhaColuna = 5, maxSorteados = 25, escopoNumero = 25, marcadosCartela = 0, variavelParaContinuarJogando = 0, numeroRodada, nJogadores = NumeroJogadores(), escopoSorteio = 99;
 String[] jogadores = new String[nJogadores];
 int[] pontosJogador = new int[nJogadores];
 int[,,] cartela = new int[linhaColuna, linhaColuna, nJogadores];
 bool fezLinha = false, fezColuna = false, fezTabela = false, continuaJogando = true;
-int[] jaSorteados = new int[99], acheiNaTabela = new int[nJogadores];
+int[] jaSorteados = new int[escopoSorteio], acheiNaTabela = new int[nJogadores];
 int[,] pontosLinha = new int[linhaColuna, nJogadores], pontosColuna = new int[linhaColuna, nJogadores];
 
 //Imprimir uma Cartela
@@ -89,12 +89,12 @@ int[] Sortear(int maximo)
 
     int sorteadoAtual;
 
-    sorteadoAtual = new Random().Next(1, escopoNumero + 1);
+    sorteadoAtual = new Random().Next(1, escopoSorteio + 1);
     sorteados[0] = sorteadoAtual;
 
     for (int i = 1; i < maximo; i++)
     {
-        sorteadoAtual = new Random().Next(1, escopoNumero + 1);
+        sorteadoAtual = new Random().Next(1, escopoSorteio + 1);
 
         for (int j = 0; j < i; j++)
         {
@@ -138,10 +138,8 @@ int[,,] CriacaoCartela(int qualMatriz)
 //Verifica pontos na Tabela toda
 int VerificarTabela(int[,,] cartela, int indiceSorteado, int qualMatriz)
 {
-
     if (!fezTabela)
     {
-
         for (int linha = 0; linha < linhaColuna; linha++)
         {
             for (int coluna = 0; coluna < linhaColuna; coluna++)
@@ -150,13 +148,9 @@ int VerificarTabela(int[,,] cartela, int indiceSorteado, int qualMatriz)
                 {
                     acheiNaTabela[qualMatriz]++;
                 }
-
             }
-
         }
-
     }
-
     return acheiNaTabela[qualMatriz];
 }
 
