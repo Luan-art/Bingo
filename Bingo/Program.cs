@@ -32,15 +32,16 @@ Recursos opcionais: (Ultimo)
 Cada jogador pode ter mais de uma cartela.
 O jogo deve ser capaz de ser jogado por mais de 2 jogadores, onde o usuário informa no inicio do programa a quantidade de jogadores que ele deseja.*/
 
-String[] jogadores;
-int linhaColuna = 5, maxSorteados = 25, escopoNumero = 99, marcadosCartela = 0, acheiNaTabela = 0;
-int pontosJogador = 0;
-int[,] cartela;
-bool fezLinha = false, fezColuna = false;
-int[] jaSorteados = new int[99], pontosLinha = new int[linhaColuna], pontosColuna = new int[linhaColuna];
+int linhaColuna = 5, maxSorteados = 25, escopoNumero = 25, marcadosCartela = 0, variavelParaContinuarJogando = 0, numeroRodada, nJogadores = NumeroJogadores(), escopoSorteio = 99;
+String[] jogadores = new String[nJogadores];
+int[] pontosJogador = new int[nJogadores];
+int[,,] cartela = new int[linhaColuna, linhaColuna, nJogadores];
+bool fezLinha = false, fezColuna = false, fezTabela = false, continuaJogando = true;
+int[] jaSorteados = new int[escopoSorteio], acheiNaTabela = new int[nJogadores];
+int[,] pontosLinha = new int[linhaColuna, nJogadores], pontosColuna = new int[linhaColuna, nJogadores];
 
 //Imprimir uma Cartela
-void ImprimirMatriz(int[,] matriz, String mensagem)
+void ImprimirMatriz(int[,,] matriz, String mensagem, int qualMatriz, int[] jaSorteados)
 {
     Console.WriteLine("\n" + mensagem);
 
@@ -48,12 +49,37 @@ void ImprimirMatriz(int[,] matriz, String mensagem)
     {
         Console.WriteLine();
         for (int coluna = 0; coluna < linhaColuna; coluna++)
-            Console.Write(matriz[linha, coluna] + " ");
+        {
+
+            if(numeroRodada == 0)
+            {
+                Console.Write(matriz[linha, coluna, qualMatriz] + " ");
+
+            }
+
+            if (numeroRodada > 0)
+            {
+                for (int verificiador = 0; verificiador < numeroRodada; verificiador++)
+                {
+                    if (matriz[linha, coluna, qualMatriz] == jaSorteados[verificiador])
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGreen;
+                        Console.Write(matriz[linha, coluna, qualMatriz] + " ");
+                        Console.ResetColor();
+                    }
+                    else
+                    {
+                       Console.Write(matriz[linha, coluna, qualMatriz] + " ");
+                    
+                    }
+                }
+            }
+  
+        }
 
     }
 
     Console.WriteLine();
-
 }
 
 //sortearAleatoriamente
@@ -63,12 +89,12 @@ int[] Sortear(int maximo)
 
     int sorteadoAtual;
 
-    sorteadoAtual = new Random().Next(1, escopoNumero + 1);
+    sorteadoAtual = new Random().Next(1, escopoSorteio + 1);
     sorteados[0] = sorteadoAtual;
 
     for (int i = 1; i < maximo; i++)
     {
-        sorteadoAtual = new Random().Next(1, escopoNumero + 1);
+        sorteadoAtual = new Random().Next(1, escopoSorteio + 1);
 
         for (int j = 0; j < i; j++)
         {
@@ -89,10 +115,9 @@ int[] Sortear(int maximo)
 }
 
 //Criação De Uma Cartela
-int[,] CriacaoCartela()
+int[,,] CriacaoCartela(int qualMatriz)
 {
 
-    int[,] cartela = new int[linhaColuna, linhaColuna + 1];
     int[] sorteadosParaCartela;
     int passador = 0;
 
@@ -100,10 +125,10 @@ int[,] CriacaoCartela()
 
     for (int linha = 0; linha < linhaColuna; linha++)
     {
-        for (int coluna = 0; coluna < linhaColuna; coluna++)
+        for (int coluna = 0; coluna < linhaColuna; coluna++, passador++)
         {
-            cartela[linha, coluna] = sorteadosParaCartela[passador];
-            passador++;
+            cartela[linha, coluna, qualMatriz] = sorteadosParaCartela[passador];
+       
         }
     }
 
@@ -111,26 +136,26 @@ int[,] CriacaoCartela()
 }
 
 //Verifica pontos na Tabela toda
-int VerificarTabela(int[,] cartela, int indiceSorteado)
+int VerificarTabela(int[,,] cartela, int indiceSorteado, int qualMatriz)
 {
-
-    for (int linha = 0; linha < linhaColuna; linha++)
+    if (!fezTabela)
     {
-        for (int coluna = 0; coluna < linhaColuna; coluna++)
+        for (int linha = 0; linha < linhaColuna; linha++)
         {
-            if (cartela[linha, coluna] == jaSorteados[indiceSorteado])
+            for (int coluna = 0; coluna < linhaColuna; coluna++)
             {
-                acheiNaTabela++;
+                if (cartela[linha, coluna, qualMatriz] == jaSorteados[indiceSorteado])
+                {
+                    acheiNaTabela[qualMatriz]++;
+                }
             }
         }
-
     }
-
-    return acheiNaTabela;
+    return acheiNaTabela[qualMatriz];
 }
 
 //Verifica pontos em cada Coluna
-void VerificarColunas(int[,] cartela, int indiceSorteado)
+void VerificarColunas(int[,,] cartela, int indiceSorteado, int qualMatriz)
 {
     if (!fezColuna)
     {
@@ -138,9 +163,9 @@ void VerificarColunas(int[,] cartela, int indiceSorteado)
         {
             for (int coluna = 0; coluna < linhaColuna; coluna++)
             {
-                if (cartela[linha, coluna] == jaSorteados[indiceSorteado])
+                if (cartela[linha, coluna, qualMatriz] == jaSorteados[indiceSorteado])
                 {
-                    pontosColuna[coluna]++;
+                    pontosColuna[coluna, qualMatriz]++;
                 }
             }
 
@@ -148,10 +173,10 @@ void VerificarColunas(int[,] cartela, int indiceSorteado)
 
         for (int colunas = 0; colunas < linhaColuna; colunas++)
         {
-            if (pontosColuna[colunas] == linhaColuna)
+            if (pontosColuna[colunas, qualMatriz] == linhaColuna)
             {
-                Console.WriteLine("FeZ Coluna!!!");
-                pontosJogador++;
+                Console.WriteLine("FeZ Coluna!!!Parabéns" + jogadores[qualMatriz]);
+                pontosJogador[qualMatriz]++;
                 fezColuna = true;
             }
         }
@@ -159,7 +184,7 @@ void VerificarColunas(int[,] cartela, int indiceSorteado)
 }
 
 //Verifica pontos em cada Linha
-void VerificarLinhas(int[,] cartela, int indiceSorteado)
+void VerificarLinhas(int[,,] cartela, int indiceSorteado, int qualMatriz)
 {
     if (!fezLinha)
     {
@@ -167,9 +192,9 @@ void VerificarLinhas(int[,] cartela, int indiceSorteado)
         {
             for (int linha = 0; linha < linhaColuna; linha++)
             {
-                if (cartela[linha, coluna] == jaSorteados[indiceSorteado])
+                if (cartela[linha, coluna, qualMatriz] == jaSorteados[indiceSorteado])
                 {
-                    pontosLinha[linha]++;
+                    pontosLinha[linha, qualMatriz]++;
                 }
             }
 
@@ -177,20 +202,21 @@ void VerificarLinhas(int[,] cartela, int indiceSorteado)
 
         for (int linhas = 0; linhas < linhaColuna; linhas++)
         {
-            if (pontosLinha[linhas] == linhaColuna)
+            if (pontosLinha[linhas, qualMatriz] == linhaColuna)
             {
-                Console.WriteLine("FeZ Linha!!!");
-                pontosJogador++;
+                Console.WriteLine("FeZ Linha!!!Parabéns " + jogadores[qualMatriz]);
+                pontosJogador[qualMatriz]++;
                 fezLinha = true;
             }
         }
     }
 }
 
-String[] identificarJogador()
+//Identifica Jogadores por nome e armazena num vetor de nomes
+String[] IdentificarJogador()
 {
     int numeroJogador = 0;
-    String[] nomesJogadores = new string[2];
+    String[] nomesJogadores = new String[nJogadores];
 
     do
     {
@@ -203,36 +229,113 @@ String[] identificarJogador()
     return nomesJogadores;
 }
 
-jogadores = identificarJogador();
-
-cartela = CriacaoCartela();
-
-ImprimirMatriz(cartela, "Cartela");
-
-jaSorteados = Sortear(escopoNumero);
-
-for (int i = 0; i < jaSorteados.Length; i++)
+int NumeroJogadores()
 {
-    Console.WriteLine("Numero Da Rodade " + jaSorteados[i]);
+    int numeroJogadores;
+    Console.WriteLine("Digite o numero de jogadores: ");
+    numeroJogadores = int.Parse(Console.ReadLine());
 
-    marcadosCartela = VerificarTabela(cartela, i);
-
-    if (marcadosCartela == 25)
-    {
-        Console.WriteLine("BINGO");
-        pontosJogador += 5;
-        Console.ReadKey();
-        break;
-
-    }
-    else
-    {
-        Console.WriteLine("Numeros na sua Cartela " + marcadosCartela);
-        Console.ReadKey();
-    }
-
-    VerificarLinhas(cartela, i);
-    VerificarColunas(cartela, i);
+    return numeroJogadores;
 }
 
-Console.WriteLine("Parabens Jogador!!! Você Fez " + pontosJogador + " Pontos!!!!");
+jogadores = IdentificarJogador();
+
+do
+{
+    jaSorteados = Sortear(escopoNumero);
+    numeroRodada = 0;
+    continuaJogando = true;
+
+    for (int i = 0; i < jogadores.Length; i++)
+    {
+        Console.WriteLine($"\nEssa e a sua cartela {jogadores[i]}\n " +
+            $"Bom jogo!");
+        cartela = CriacaoCartela(i);
+        ImprimirMatriz(cartela, "Cartela", i, jaSorteados);
+
+    }
+   
+    for (int i = 0; i < jaSorteados.Length && !fezTabela; i++)
+    {
+        numeroRodada++;
+        Console.ReadLine();
+        Console.WriteLine("\nNumero Sorteado " + jaSorteados[i]);
+
+        for (int j = 0; j < jogadores.Length; j++)
+        {
+            marcadosCartela = VerificarTabela(cartela, i, j);
+            ImprimirMatriz(cartela, "Sua Cartela Atualiza ", j, jaSorteados);
+
+
+            if (marcadosCartela == maxSorteados)
+            {
+                fezTabela = true;
+                Console.WriteLine("BINGO DO JOGADOR " + jogadores[j]);
+                pontosJogador[j] += linhaColuna;
+                Console.ReadKey();
+                break;
+
+            }
+            else
+            {
+                Console.WriteLine($"Numeros na sua Cartela {jogadores[j]} {marcadosCartela}");
+                Console.ReadKey();
+            }
+
+            VerificarLinhas(cartela, i, j);
+            VerificarColunas(cartela, i, j);
+        }
+
+    }
+
+    Console.WriteLine("Pontos: " + jogadores[0] + " !!! Você tem " + pontosJogador[0] + " Pontos!!!!");
+    Console.WriteLine("Pontos: " + jogadores[1] + " !!! Você tem " + pontosJogador[1] + " Pontos!!!!");
+
+    do
+    {
+        Console.WriteLine("Deseja Jogar Mais uma rodada [1]");
+        Console.WriteLine("Deseja Jogar Mais uma rodada [2]");
+        variavelParaContinuarJogando = int.Parse(Console.ReadLine());
+
+        switch (variavelParaContinuarJogando)
+        {
+            case 1:
+                Console.WriteLine("\nVamos para mais uma!\n");
+                fezLinha = false;
+                fezColuna = false;
+                fezTabela = false;
+
+
+                break;
+            case 2:
+                Console.WriteLine("\nJogo Finalizado!\n");
+                continuaJogando = false;
+                break;
+            default:
+                Console.WriteLine("\nInsira um valor valido!\n");
+                break;
+        }
+    } while (variavelParaContinuarJogando != 1 && variavelParaContinuarJogando != 2);
+
+
+} while (continuaJogando);
+
+int pontosMaiores = pontosJogador[0];
+int indiceMaior = 0;
+
+for (int j = 1; j < jogadores.Length; j++)
+{
+    if (pontosJogador[j] > pontosMaiores)
+    {
+        pontosMaiores = pontosJogador[j];
+        indiceMaior = j;
+    }
+
+}
+Console.WriteLine($"\nParabes {jogadores[indiceMaior]} você ganhou com {pontosJogador[indiceMaior]}\n");
+
+Console.ReadKey();
+
+
+
+
