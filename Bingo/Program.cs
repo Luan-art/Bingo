@@ -38,7 +38,6 @@ int pontosJogador = 0;
 int[,] cartela;
 bool fezLinha = false, fezColuna = false;
 int[] jaSorteados = new int[99], pontosLinha = new int[linhaColuna], pontosColuna = new int[linhaColuna];
-bool preencherColuna = false, preencherLinha = false;
 
 //Imprimir uma Cartela
 void ImprimirMatriz(int[,] matriz, String mensagem)
@@ -58,18 +57,18 @@ void ImprimirMatriz(int[,] matriz, String mensagem)
 }
 
 //sortearAleatoriamente
-int[] Sortear( int maximo)
+int[] Sortear(int maximo)
 {
     int[] sorteados = new int[maximo];
 
     int sorteadoAtual;
 
-    sorteadoAtual = new Random().Next(1, escopoNumero+1);
+    sorteadoAtual = new Random().Next(1, escopoNumero + 1);
     sorteados[0] = sorteadoAtual;
 
     for (int i = 1; i < maximo; i++)
     {
-        sorteadoAtual = new Random().Next(1, escopoNumero+1);
+        sorteadoAtual = new Random().Next(1, escopoNumero + 1);
 
         for (int j = 0; j < i; j++)
         {
@@ -90,7 +89,8 @@ int[] Sortear( int maximo)
 }
 
 //Criação De Uma Cartela
-int[,] CriacaoCartela(){
+int[,] CriacaoCartela()
+{
 
     int[,] cartela = new int[linhaColuna, linhaColuna + 1];
     int[] sorteadosParaCartela;
@@ -100,7 +100,7 @@ int[,] CriacaoCartela(){
 
     for (int linha = 0; linha < linhaColuna; linha++)
     {
-        for(int coluna = 0; coluna < linhaColuna; coluna++)
+        for (int coluna = 0; coluna < linhaColuna; coluna++)
         {
             cartela[linha, coluna] = sorteadosParaCartela[passador];
             passador++;
@@ -113,7 +113,7 @@ int[,] CriacaoCartela(){
 //Verifica pontos na Tabela toda
 int VerificarTabela(int[,] cartela, int indiceSorteado)
 {
-    
+
     for (int linha = 0; linha < linhaColuna; linha++)
     {
         for (int coluna = 0; coluna < linhaColuna; coluna++)
@@ -123,7 +123,7 @@ int VerificarTabela(int[,] cartela, int indiceSorteado)
                 acheiNaTabela++;
             }
         }
-        
+
     }
 
     return acheiNaTabela;
@@ -146,7 +146,7 @@ void VerificarColunas(int[,] cartela, int indiceSorteado)
 
         }
 
-        for(int colunas = 0; colunas < linhaColuna; colunas++)
+        for (int colunas = 0; colunas < linhaColuna; colunas++)
         {
             if (pontosColuna[colunas] == linhaColuna)
             {
@@ -203,40 +203,36 @@ String[] identificarJogador()
     return nomesJogadores;
 }
 
-    jogadores = identificarJogador();
-    
-    cartela = CriacaoCartela();
+jogadores = identificarJogador();
 
-    ImprimirMatriz(cartela, "Cartela");
+cartela = CriacaoCartela();
 
-    jaSorteados = Sortear(escopoNumero);
+ImprimirMatriz(cartela, "Cartela");
 
-    for (int i = 0; i < jaSorteados.Length; i++)
+jaSorteados = Sortear(escopoNumero);
+
+for (int i = 0; i < jaSorteados.Length; i++)
+{
+    Console.WriteLine("Numero Da Rodade " + jaSorteados[i]);
+
+    marcadosCartela = VerificarTabela(cartela, i);
+
+    if (marcadosCartela == 25)
     {
-        Console.WriteLine("Numero Da Rodade " + jaSorteados[i]);
+        Console.WriteLine("BINGO");
+        pontosJogador += 5;
+        Console.ReadKey();
+        break;
 
-        marcadosCartela = VerificarTabela(cartela, i);
-
-        if (marcadosCartela == 25)
-        {
-            Console.WriteLine("BINGO");
-            pontosJogador += 5;
-            Console.ReadKey();
-            break;
-
-        }
-        else
-        {
-            Console.WriteLine("Numeros na sua Cartela " + marcadosCartela);
-            Console.ReadKey();
-        }
-
-        VerificarLinhas(cartela, i);
-        VerificarColunas(cartela, i);
+    }
+    else
+    {
+        Console.WriteLine("Numeros na sua Cartela " + marcadosCartela);
+        Console.ReadKey();
     }
 
-    Console.WriteLine("Parabens Jogador!!! Você Fez " + pontosJogador + " Pontos!!!!");
+    VerificarLinhas(cartela, i);
+    VerificarColunas(cartela, i);
+}
 
-
-
-
+Console.WriteLine("Parabens Jogador!!! Você Fez " + pontosJogador + " Pontos!!!!");
