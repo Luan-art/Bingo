@@ -33,20 +33,21 @@ Cada jogador pode ter mais de uma cartela.
 O jogo deve ser capaz de ser jogado por mais de 2 jogadores, onde o usuário informa no inicio do programa a quantidade de jogadores que ele deseja.*/
 
 int linhaColuna = 5, maxSorteados = 25, escopoNumero = 25, marcadosCartela = 0, variavelParaContinuarJogando = 0, numeroRodada;
-int nJogadores = NumeroJogadores(), escopoSorteio = 99;
+int nJogadores = NumeroJogadores(), escopoSorteio = 99, nCartelas = NumeroCartelas();
 String[] jogadores = new String[nJogadores];
+int[] carTelasTotais = new int[nCartelas * nJogadores];
 int[] pontosJogador = new int[nJogadores];
-int[,,] cartela = new int[linhaColuna, linhaColuna, nJogadores];
-int[] jaSorteados = new int[escopoSorteio], acheiNaTabela = new int[nJogadores];
-int[,] pontosLinha = new int[linhaColuna, nJogadores], pontosColuna = new int[linhaColuna, nJogadores];
+int[,,,] cartela = new int[linhaColuna, linhaColuna, nJogadores, nCartelas * nJogadores];
+int[] jaSorteados = new int[escopoSorteio];
+int[,] cartelasMesmoJogado = new int[nJogadores, nCartelas * nJogadores], acheiNaTabela = new int[nJogadores, nCartelas * nJogadores];
+int[,,] pontosLinha = new int[linhaColuna, nJogadores, nCartelas * nJogadores], pontosColuna = new int[linhaColuna, nJogadores, nCartelas * nJogadores];
 bool fezLinha = false, fezColuna = false, fezTabela = false, continuaJogando = true;
 
 
 //Imprimir uma Cartela
-void ImprimirMatriz(int[,,] matriz, String mensagem, int qualMatriz, int[] jaSorteados)
+void ImprimirMatriz(int[,,,] matriz, String mensagem, int qualMatriz, int MatrizN, int[] jaSorteados)
 {
     bool sorteadosAnteriormente;
-
     Console.WriteLine("\n" + mensagem);
 
     for (int linha = 0; linha < linhaColuna; linha++)
@@ -58,7 +59,7 @@ void ImprimirMatriz(int[,,] matriz, String mensagem, int qualMatriz, int[] jaSor
 
             for (int verificador = 0; verificador < numeroRodada; verificador++)
             {
-                if (matriz[linha, coluna, qualMatriz] == jaSorteados[verificador])
+                if (matriz[linha, coluna, qualMatriz, MatrizN] == jaSorteados[verificador])
                 {
                     sorteadosAnteriormente = true;
                     break;
@@ -69,12 +70,12 @@ void ImprimirMatriz(int[,,] matriz, String mensagem, int qualMatriz, int[] jaSor
             if (sorteadosAnteriormente)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGreen;
-                Console.Write(matriz[linha, coluna, qualMatriz] + " ");
+                Console.Write(matriz[linha, coluna, qualMatriz, MatrizN] + " ");
                 Console.ResetColor();
             }
             else
             {
-                Console.Write(matriz[linha, coluna, qualMatriz] + " ");
+                Console.Write(matriz[linha, coluna, qualMatriz, MatrizN] + " ");
             }
 
         }
@@ -118,9 +119,8 @@ int[] Sortear(int maximo)
 }
 
 //Criação De Uma Cartela
-int[,,] CriacaoCartela(int qualMatriz)
+int[,,,] CriacaoCartela(int qualMatriz, int nDela)
 {
-
     int[] sorteadosParaCartela;
     int passador = 0;
 
@@ -130,8 +130,7 @@ int[,,] CriacaoCartela(int qualMatriz)
     {
         for (int coluna = 0; coluna < linhaColuna; coluna++, passador++)
         {
-            cartela[linha, coluna, qualMatriz] = sorteadosParaCartela[passador];
-
+            cartela[linha, coluna, qualMatriz, nDela] = sorteadosParaCartela[passador];
         }
     }
 
@@ -139,7 +138,7 @@ int[,,] CriacaoCartela(int qualMatriz)
 }
 
 //Verifica pontos na Tabela toda
-int VerificarTabela(int[,,] cartela, int indiceSorteado, int qualMatriz)
+int VerificarTabela(int[,,,] cartela, int indiceSorteado, int qualMatriz, int matrizM)
 {
     if (!fezTabela)
     {
@@ -147,18 +146,18 @@ int VerificarTabela(int[,,] cartela, int indiceSorteado, int qualMatriz)
         {
             for (int coluna = 0; coluna < linhaColuna; coluna++)
             {
-                if (cartela[linha, coluna, qualMatriz] == jaSorteados[indiceSorteado])
+                if (cartela[linha, coluna, qualMatriz, matrizM] == jaSorteados[indiceSorteado])
                 {
-                    acheiNaTabela[qualMatriz]++;
+                    acheiNaTabela[qualMatriz, matrizM]++;
                 }
             }
         }
     }
-    return acheiNaTabela[qualMatriz];
+    return acheiNaTabela[qualMatriz, matrizM];
 }
 
 //Verifica pontos em cada Coluna
-void VerificarColunas(int[,,] cartela, int indiceSorteado, int qualMatriz)
+void VerificarColunas(int[,,,] cartela, int indiceSorteado, int qualMatriz, int matrizN)
 {
     if (!fezColuna)
     {
@@ -166,9 +165,9 @@ void VerificarColunas(int[,,] cartela, int indiceSorteado, int qualMatriz)
         {
             for (int coluna = 0; coluna < linhaColuna; coluna++)
             {
-                if (cartela[linha, coluna, qualMatriz] == jaSorteados[indiceSorteado])
+                if (cartela[linha, coluna, qualMatriz, matrizN] == jaSorteados[indiceSorteado])
                 {
-                    pontosColuna[coluna, qualMatriz]++;
+                    pontosColuna[coluna, qualMatriz, matrizN]++;
                        
                 }
             }
@@ -177,7 +176,7 @@ void VerificarColunas(int[,,] cartela, int indiceSorteado, int qualMatriz)
 
         for (int colunas = 0; colunas < linhaColuna; colunas++)
         {
-            if (pontosColuna[colunas, qualMatriz] == linhaColuna)
+            if (pontosColuna[colunas, qualMatriz, matrizN] == linhaColuna)
             {
                 Console.WriteLine("FeZ Coluna!!!Parabéns" + jogadores[qualMatriz]);
                 pontosJogador[qualMatriz]++;
@@ -188,7 +187,7 @@ void VerificarColunas(int[,,] cartela, int indiceSorteado, int qualMatriz)
 }
 
 //Verifica pontos em cada Linha
-void VerificarLinhas(int[,,] cartela, int indiceSorteado, int qualMatriz)
+void VerificarLinhas(int[,,,] cartela, int indiceSorteado, int qualMatriz, int matrizN)
 {
     if (!fezLinha)
     {
@@ -196,9 +195,9 @@ void VerificarLinhas(int[,,] cartela, int indiceSorteado, int qualMatriz)
         {
             for (int linha = 0; linha < linhaColuna; linha++)
             {
-                if (cartela[linha, coluna, qualMatriz] == jaSorteados[indiceSorteado])
+                if (cartela[linha, coluna, qualMatriz, matrizN] == jaSorteados[indiceSorteado])
                 {
-                    pontosLinha[linha, qualMatriz]++;
+                    pontosLinha[linha, qualMatriz, matrizN]++;
                 }
             }
 
@@ -206,7 +205,7 @@ void VerificarLinhas(int[,,] cartela, int indiceSorteado, int qualMatriz)
 
         for (int linhas = 0; linhas < linhaColuna; linhas++)
         {
-            if (pontosLinha[linhas, qualMatriz] == linhaColuna)
+            if (pontosLinha[linhas, qualMatriz, matrizN] == linhaColuna)
             {
                 Console.WriteLine("FeZ Linha!!!Parabéns " + jogadores[qualMatriz]);
                 pontosJogador[qualMatriz]++;
@@ -233,6 +232,7 @@ String[] IdentificarJogador()
     return nomesJogadores;
 }
 
+//Define Numero de Jogadores
 int NumeroJogadores()
 {
     int numeroJogadores;
@@ -242,14 +242,15 @@ int NumeroJogadores()
     return numeroJogadores;
 }
 
-/*int NumeroCartelas()
+//Define Numero de Jogadores
+int NumeroCartelas()
 {
     int numeroCartelas;
     Console.WriteLine("Digite o numero de Cartelas: ");
     numeroCartelas = int.Parse(Console.ReadLine());
 
     return numeroCartelas;
-}*/
+}
 
 jogadores = IdentificarJogador();
 
@@ -262,10 +263,15 @@ do
 
     for (int i = 0; i < jogadores.Length; i++)
     {
-        Console.WriteLine($"\nEssa e a sua cartela {jogadores[i]}\n " +
-            $"Bom jogo!");
-        cartela = CriacaoCartela(i);
-        ImprimirMatriz(cartela, "Cartela", i, jaSorteados);
+        Console.WriteLine($"\nEssas são suas cartelas {jogadores[i]}\n " +
+        $"Bom jogo!");
+
+        for (int j = 0; j < carTelasTotais.Length; j++)
+        {
+            cartela = CriacaoCartela(i, j);
+            ImprimirMatriz(cartela, "Cartela", i, j, jaSorteados);
+        }
+
     }
 
 
@@ -278,29 +284,32 @@ do
 
         for (int j = 0; j < jogadores.Length; j++)
         {
-            marcadosCartela = VerificarTabela(cartela, i, j);
-            ImprimirMatriz(cartela, "Sua Cartela Atualiza ", j, jaSorteados);
-    
+            Console.WriteLine($"\n{jogadores[j]}'s Cartelas:");
 
-
-            if (marcadosCartela == 25)
+            for (int k = 0; k < carTelasTotais.Length; k++)
             {
-                fezTabela = true;
-                Console.WriteLine("BINGO DO JOGADOR " + jogadores[j]);
-                pontosJogador[j] += 5;
-                Console.ReadKey();
-                break;
-                    
-            }
-            else
-            {
-                Console.WriteLine($"Numeros na sua Cartela {jogadores[j]} {marcadosCartela}");
-                Console.ReadKey();
-            }
-           
-            VerificarLinhas(cartela, i, j);
-            VerificarColunas(cartela, i, j);
+                marcadosCartela = VerificarTabela(cartela, i, j,k);
+                ImprimirMatriz(cartela, "Sua Cartela Atualiza ", j, k, jaSorteados);
 
+                if (marcadosCartela == 25)
+                {
+                    fezTabela = true;
+                    Console.WriteLine("BINGO DO JOGADOR " + jogadores[j]);
+                    pontosJogador[j] += 5;
+                    Console.ReadKey();
+                    break;
+
+                }
+                else
+                {
+                    Console.WriteLine($"Numeros na sua Cartela {jogadores[j]} {marcadosCartela}");
+                    Console.ReadKey();
+                }
+
+                VerificarLinhas(cartela, i, j, k);
+                VerificarColunas(cartela, i, j, k);
+
+            }
 
         }
 
@@ -329,13 +338,17 @@ do
 
                 for (int j = 0; j < nJogadores; j++)
                 {
-                    acheiNaTabela[j] = 0;
-
-                    for (int i = 0; i < linhaColuna; i++)
+                    for (int k = 0; k < nCartelas; k++)
                     {
-                        pontosLinha[i,j] = 0;
-                        pontosColuna[i,j] = 0;
+                        acheiNaTabela[j, k] = 0;
+
+                        for (int i = 0; i < linhaColuna; i++)
+                        {
+                            pontosLinha[i, j, k] = 0;
+                            pontosColuna[i, j, k] = 0;
+                        }
                     }
+
                 }
                 break;
             case 2:
