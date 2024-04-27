@@ -35,7 +35,7 @@ O jogo deve ser capaz de ser jogado por mais de 2 jogadores, onde o usuário inf
 int linhaColuna = 5, maxSorteados = 25, escopoNumero = 25, marcadosCartela = 0, variavelParaContinuarJogando = 0, numeroRodada;
 int nJogadores = NumeroJogadores(), escopoSorteio = 99, nCartelas = NumeroCartelas();
 String[] jogadores = new String[nJogadores];
-int[] carTelasTotais = new int[nCartelas * nJogadores];
+int[] carTelasTotais = new int[nCartelas];
 int[] pontosJogador = new int[nJogadores];
 int[,,,] cartela = new int[linhaColuna, linhaColuna, nJogadores, nCartelas * nJogadores];
 int[] jaSorteados = new int[escopoSorteio];
@@ -50,7 +50,7 @@ void ImprimirMatriz(int[,,,] matriz, String mensagem, int qualMatriz, int Matriz
     bool sorteadosAnteriormente;
     Console.WriteLine("\n" + mensagem);
 
-    for (int linha = 0; linha < linhaColuna; linha++)
+    for (int linha = 0; linha < linhaColuna && !fezTabela; linha++)
     {
         Console.WriteLine();
         for (int coluna = 0; coluna < linhaColuna; coluna++)
@@ -284,12 +284,12 @@ do
 
         for (int j = 0; j < jogadores.Length; j++)
         {
-            Console.WriteLine($"\n{jogadores[j]}'s Cartelas:");
+            Console.WriteLine($"\n{jogadores[j]} Cartelas:");
 
             for (int k = 0; k < carTelasTotais.Length; k++)
             {
                 marcadosCartela = VerificarTabela(cartela, i, j,k);
-                ImprimirMatriz(cartela, "Sua Cartela Atualiza ", j, k, jaSorteados);
+                ImprimirMatriz(cartela, "Sua Cartela Atualiza " , j, k, jaSorteados);
 
                 if (marcadosCartela == 25)
                 {
@@ -311,6 +311,11 @@ do
 
             }
 
+        }
+
+        if (fezTabela)
+        {
+            break;
         }
 
     }
